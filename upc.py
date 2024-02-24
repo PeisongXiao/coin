@@ -7,6 +7,9 @@ driver.implicitly_wait(5)
 def get_name_from_upc(upc: str) -> str:
     url = "https://stocktrack.ca/wm/index.php?s=wm&upc=" + upc
     driver.get(url)
+
+    # Change the cookies here to match that of yours when you lookup
+    # any item on stocktrack.ca to bypass the Cloudflare checks
     driver.add_cookie({
         "name": "PHPSESSID",
         "value": "835ttgvbgncf4uq82dpagmk688",
@@ -25,6 +28,7 @@ def get_name_from_upc(upc: str) -> str:
         "path": "/",
         "domain": "stocktrack.ca"
     })
+
     driver.refresh()
     name = ""
     str_s = "target=\"_blank\">"

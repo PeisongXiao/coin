@@ -1,0 +1,17 @@
+#+TITLE: coin - An inventory manager to keep track of items bought from Walmart (Canada)
+#+AUTHOR: Peisong Xiao
+#+EMAIL: peisong.xiao.xps@gmail.com
+#+OPTIONS: toc:nil date:nil
+
+* Why coin?
+If you'd like to keep track of your groceries, use coin.
+
+* How does coin work?
+First, coins pulls the UPC and price info off of the given Walmart
+receipt.
+
+Then, coin matches the name with the UPC (Yes! No more scratching your
+head against seemingly random Walmart abbreviations for items!) using
+a scraper
+
+Finally, it stores your shopping trip in a database.
