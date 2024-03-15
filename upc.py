@@ -4,12 +4,12 @@ from seleniumbase import Driver
 driver = Driver(uc=True)
 driver.implicitly_wait(5)
 
-def get_name_from_upc(upc: str) -> str:
+def get_name_from_upc(upc: str, wait_interval=10) -> str:
     url = "https://stocktrack.ca/wm/index.php?s=wm&upc=" + upc
     driver.get(url)
 
     # Change the cookies here to match that of yours when you lookup
-    # any item on stocktrack.ca to bypass the Cloudflare checks
+    #  any item on stocktrack.ca to bypass the Cloudflare checks
     driver.add_cookie({
         "name": "PHPSESSID",
         "value": "835ttgvbgncf4uq82dpagmk688",
@@ -39,7 +39,7 @@ def get_name_from_upc(upc: str) -> str:
             print("Iteration No. ", times)
             times = times + 1
 
-        time.sleep(20)
+        time.sleep(wait_interval)
         page = str(driver.execute_script(
             "return document.getElementsByTagName('html')[0].innerHTML"))
         t = page.find(str_t)

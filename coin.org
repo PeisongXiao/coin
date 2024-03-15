@@ -15,3 +15,11 @@ head against seemingly random Walmart abbreviations for items!) using
 a scraper
 
 Finally, it stores your shopping trip in a database.
+
+* Dependencies
++ Python
++ PyQt6
++ pytesseract
++ OpenCV (On Python)
++ PIL
++ Selenium (undetected)
