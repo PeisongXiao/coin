@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1280</width>
+    <width>1695</width>
     <height>720</height>
    </rect>
   </property>
@@ -58,7 +58,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>594</width>
+            <width>802</width>
             <height>644</height>
            </rect>
           </property>
@@ -101,7 +101,14 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="saveButton">
+           <widget class="QPushButton" name="saveFileButton">
+            <property name="text">
+             <string>Save to file</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="saveDbButton">
             <property name="text">
              <string>Save to database</string>
             </property>

@@ -2,3 +2,5 @@ downloaded_files/
 testing/
 cropped.png
 backup/
+__pycache__/
+page.html
