@@ -44,6 +44,20 @@ if len(model_names) == 0:
     print("No tesseract models found at", MODELS_PATH, "!", file=sys.stderr)
     sys.exit(0)
 
+class UPCWorker(QObject):
+    finished = pyqtSignal()
+    update_name = pyqtSignal(list)
+    
+    def __init__(self, upcList):
+        super().__init__()
+        self.upcList = upcList
+
+    def get_items_name(self):
+        for upc in self.upcList:
+            name = get_name_from_upc(upc[1])
+            self.update_name.emit([upc[0], name])
+        self.finished.emit()
+
 class coin_app(QtWidgets.QMainWindow):
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
@@ -69,6 +83,45 @@ class coin_app(QtWidgets.QMainWindow):
         self.scale = 1.0
 
         self.items = None
+
+        self.upcCheckTimer = QTimer(self)
+        self.upcCheckTimer.timeout.connect(self.pushUPCToThread)
+        self.upcCheckTimer.start(1500)
+        print("Initialized timer!")
+
+        self.upcThread = QThread()
+        self.upcWorker = None
+        self.upcCheckList = []
+
+    def pushUPCToThread(self):
+        if len(self.upcCheckList) > 0 and self.upcWorker is None:
+            self.upcWorker = UPCWorker(self.upcCheckList)
+            self.upcWorker.moveToThread(self.upcThread)
+
+            self.upcWorker.update_name.connect(self.updateItemName)
+            self.upcWorker.finished.connect(self.collectUPCWorker)
+            self.upcThread.finished.connect(self.collectUPCThread)
+
+            self.upcThread.started.connect(self.upcWorker.get_items_name)
+            self.upcThread.start()
+
+            print("Lookup thread started!")
+            
+            self.upcCheckList = []
+
+    def collectUPCWorker(self):
+        self.upcWorker.deleteLater()
+        self.upcWorker = None
+
+    def collectUPCThread(self):
+        self.upcThread.deleteLater()
+
+    def updateItemName(self, name):
+        itemName = QStandardItem(name[1])
+        itemName.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.items.setItem(name[0], TABLE_COL_NAME, itemName)
+        self.itemsTable.resizeColumnToContents(TABLE_COL_NAME)
+        self.itemsTable.resizeRowToContents(name[0])
 
     def update_now(self, value):
         self.model = value
@@ -177,29 +230,19 @@ class coin_app(QtWidgets.QMainWindow):
         button = self.sender()
         row = self.itemsTable.indexAt(button.pos()).row()
         upc = self.items.item(row, TABLE_COL_UPC).text()
+        self.upcCheckList.append([row, upc])
         print("Started getting name of UPC:", upc)
-        name = get_name_from_upc(upc, max_tries=3)
-        print("Got name", name, "from UPC:", upc)
-        item = QStandardItem(name)
-        item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.items.setItem(row, TABLE_COL_NAME, item)
-        self.itemsTable.resizeColumnToContents(TABLE_COL_NAME)
-        self.itemsTable.resizeRowToContents(row)
+        self.statusBar().showMessage("Started getting name of UPC: " + upc)
+        self.pushUPCToThread()
 
     def get_all(self):
-        for i in range(1, self.items.rowCount()):
-            
+        for i in range(1, self.items.rowCount()):            
             if self.items.item(i, TABLE_COL_NAME) is None or self.items.item(i, TABLE_COL_NAME).text() == "N/A":
                 upc = self.items.item(i, TABLE_COL_UPC).text()
                 print("Started getting name of UPC:", upc)
                 self.statusBar().showMessage("Started getting name of UPC: " + upc)
-                name = get_name_from_upc(upc, wait_interval=1, max_tries=30)
-                print("Got name", name, "from UPC:", upc)
-                item = QStandardItem(name)
-                item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                self.items.setItem(i, TABLE_COL_NAME, item)
-        self.itemsTable.resizeColumnToContents(TABLE_COL_NAME)
-        self.itemsTable.resizeRowsToContents()
+                self.upcCheckList.append([i, upc])
+        self.pushUPCToThread()
 
     def del_row(self):
         button = self.sender()

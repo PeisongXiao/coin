@@ -1,10 +1,11 @@
 import time
 from seleniumbase import Driver
+# from selenium import webdriver
 
 driver = Driver(uc=True)
 driver.implicitly_wait(5)
 
-def get_name_from_upc(upc: str, wait_interval=3, max_tries=10) -> str:
+def get_name_from_upc(upc: str, wait_interval=1, max_tries=30) -> str:
     url = "https://stocktrack.ca/wm/index.php?s=wm&upc=" + upc
     driver.get(url)
 
