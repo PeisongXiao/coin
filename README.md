@@ -1,12 +1,11 @@
-#+TITLE: coin - Something to coin the items on your receipts
-#+AUTHOR: Peisong Xiao
-#+EMAIL: peisong.xiao.xps@gmail.com
-#+OPTIONS: toc:nil date:nil
+# coin
+Something to coin the items on your receipts
 
-* Why coin?
+## Why coin?
 Because normal humans can't decipher what's on the Walmart receipts.
 
-* How does coin work?
+
+## How does coin work?
 First, coins pulls the UPC and price info off of the given Walmart
 receipt.
 
@@ -16,10 +15,12 @@ a scraper.
 
 Finally, it stores your shopping trip in a spreadsheet (.csv format).
 
-* Dependencies
-+ Python
-+ PyQt6
-+ pytesseract
-+ OpenCV (On Python)
-+ PIL
-+ Selenium (undetected, with a suitable chromedriver)
+
+## Dependencies
+-   Python
+-   PyQt6
+-   pytesseract
+-   OpenCV (On Python)
+-   PIL
+-   Selenium (undetected, with a suitable chromedriver)
+
