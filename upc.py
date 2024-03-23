@@ -1,10 +1,18 @@
+############################################################
+### Project: coin
+### File: upc.py
+### Description: scapes the item's name by using the its UPC
+### Version: 1.0
+############################################################
 import time
 from seleniumbase import Driver
-# from selenium import webdriver
+from constants import *
 
 driver = Driver(uc=True)
 driver.implicitly_wait(5)
 
+# get_name_from_upc(upc, wait_interval, max_tries): will try to get
+#  the item's name from stocktrack.ca.
 def get_name_from_upc(upc: str, wait_interval=1, max_tries=30) -> str:
     url = "https://stocktrack.ca/wm/index.php?s=wm&upc=" + upc
     driver.get(url)
@@ -13,59 +21,39 @@ def get_name_from_upc(upc: str, wait_interval=1, max_tries=30) -> str:
 
     print("Removed leading 0's:", upc)
 
-    # Change the cookies here to match that of yours when you lookup
-    #  any item on stocktrack.ca to bypass the Cloudflare checks
-    driver.add_cookie({
-        "name": "PHPSESSID",
-        "value": "9n1ic479r1bteiv758gm9hk65p",
-        "path": "/",
-        "domain": "stocktrack.ca"
-    })
-    driver.add_cookie({
-        "name": "cf_chl_3",
-        "value": "1d706187484b25c",
-        "path": "/",
-        "domain": "stocktrack.ca"
-    })
-    driver.add_cookie({
-        "name": "cf_clearance",
-        "value": "Wp8tAMUKLdS3a4Y9AT09BIlZKx4x120uC1QzBQTUluQ-1710517775-1.0.1.1-hMEP8oeggZHBkylkwkQfi2p57H6zUUvGG40d_M4vGqOqg2Zh7wZsg6KrGl3XkDUn3mXAqyZrTqlQfd5pgHCZWQ",
-        "path": "/",
-        "domain": "stocktrack.ca"
-    })
-    driver.add_cookie({
-        "name": "fp",
-        "value": "26f4acb9b23415f921bba6977b68d55f",
-        "path": "/",
-        "domain": "stocktrack.ca"
-    })
+    for cookie in COOKIE_DICT_LIST:
+        driver.add_cookie(cookie)
 
     driver.refresh()
     name = ""
-    str_s = "target=\"_blank\">"
-    str_t = "<br>UPC: " + upc + "<br>"
-    str_tt = "</a><br>SKU:"
-    times = 0
-    while times < max_tries:
-        if __debug__:
-            print("Iteration No. ", times)
+    pattern_front = "target=\"_blank\">"
+    pattern_back_upc = "<br>UPC: " + upc + "<br>"
+    pattern_back_sku = "</a><br>SKU:"
 
-        times = times + 1
+    tries = 0
+
+    while tries < max_tries:
+        if __debug__:
+            print("Iteration No.", tries)
+
+        tries = tries + 1
 
         time.sleep(wait_interval)
         page = str(driver.execute_script(
             "return document.getElementsByTagName('html')[0].innerHTML"))
-        t = page.find(str_t)
-        s = page.rfind(str_s, 0, t)
-        tt = page.rfind(str_tt, 0, t)
+
+        back_upc_idx = page.find(pattern_back_upc)
+        front_idx = page.rfind(pattern_front, 0, back_upc_idx)
+        back_sku_idx = page.rfind(pattern_back_sku, 0, back_upc_idx)
 
         if __debug__:
             p = open("page.html", "w")
             print(page, file=p)
 
-        if t == -1 or s == -1:
+        if back_upc_idx == -1 or front_idx == -1:
             continue
         else:
-            name = page[s + len(str_s) : tt]
+            name = page[front_idx + len(pattern_front) : back_sku_idx]
             break
+
     return name.replace("&nbsp;", "\n")
